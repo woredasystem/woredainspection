@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 
     if (!file || !categoryId || !subcategoryCode || !year) {
       return NextResponse.json(
-        { 
+        {
           message: "Missing required upload metadata.",
           details: { hasFile: !!file, categoryId, subcategoryCode, year }
         },
@@ -30,7 +30,9 @@ export async function POST(request: Request) {
 
     // Get woreda_id from current user's metadata (Option 2)
     const woredaId = await getCurrentUserWoredaId();
-    const safeName = encodeURIComponent(file.name);
+    // Use raw filename for storage key to ensure consistency
+    // We will handle URL encoding when generating the public URL
+    const safeName = file.name;
     const folderPath = `${woredaId}/${categoryId}/${subcategoryCode}/${year}/${safeName}`;
 
     console.log("Uploading to R2:", folderPath);
@@ -45,7 +47,7 @@ export async function POST(request: Request) {
     } catch (r2Error) {
       console.error("R2 upload failed:", r2Error);
       return NextResponse.json(
-        { 
+        {
           message: "Failed to upload file to storage.",
           error: r2Error instanceof Error ? r2Error.message : String(r2Error)
         },
@@ -66,7 +68,7 @@ export async function POST(request: Request) {
     } catch (dbError) {
       console.error("Database save failed:", dbError);
       return NextResponse.json(
-        { 
+        {
           message: "File uploaded but failed to save metadata.",
           error: dbError instanceof Error ? dbError.message : String(dbError)
         },
@@ -82,9 +84,9 @@ export async function POST(request: Request) {
         ? error.message
         : "Unhandled error while uploading.";
     const stack = error instanceof Error ? error.stack : undefined;
-    
+
     return NextResponse.json(
-      { 
+      {
         message: `Upload failed: ${message}`,
         error: message,
         stack: process.env.NODE_ENV === "development" ? stack : undefined

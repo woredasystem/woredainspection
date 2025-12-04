@@ -18,23 +18,30 @@ export async function uploadDocumentToR2(args: {
     const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME || "woreda-documents";
 
     // Construct public URL
+    // Construct public URL
+    // We encode the path components to ensure the URL is valid, including handling spaces and parentheses
+    // This ensures consistency with how we handle URLs in the frontend and API
+    const encodedPath = args.folderPath.split('/').map(p =>
+      encodeURIComponent(p)
+        .replace(/\(/g, '%28')
+        .replace(/\)/g, '%29')
+    ).join('/');
+
     let publicUrl: string;
     if (publicUrlBase.includes('pub-') && publicUrlBase.includes('.r2.dev')) {
       // Format: https://pub-ACCOUNT.r2.dev/path (bucket-specific subdomain)
-      // Usually "Public R2.dev Subdomain" in Cloudflare maps directly to the bucket root.
-      // So we should NOT append the bucket name.
       const base = publicUrlBase.endsWith('/') ? publicUrlBase.slice(0, -1) : publicUrlBase;
-      publicUrl = `${base}/${args.folderPath}`;
+      publicUrl = `${base}/${encodedPath}`;
     } else if (publicUrlBase.includes('.r2.dev') && !publicUrlBase.includes('pub-')) {
       // Format: https://BUCKET.ACCOUNT.r2.dev/path (bucket-specific subdomain)
       publicUrl = publicUrlBase.endsWith('/')
-        ? `${publicUrlBase}${args.folderPath}`
-        : `${publicUrlBase}/${args.folderPath}`;
+        ? `${publicUrlBase}${encodedPath}`
+        : `${publicUrlBase}/${encodedPath}`;
     } else {
       // Custom domain or other format
       publicUrl = publicUrlBase.endsWith('/')
-        ? `${publicUrlBase}${args.folderPath}`
-        : `${publicUrlBase}/${args.folderPath}`;
+        ? `${publicUrlBase}${encodedPath}`
+        : `${publicUrlBase}/${encodedPath}`;
     }
 
     console.log("R2 Public URL Construction:", {

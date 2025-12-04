@@ -92,55 +92,100 @@ export async function GET(request: Request) {
         );
       }
     } else if (fileUrl.includes('.r2.dev') || fileUrl.includes('pub-')) {
-      // Already a public URL, but verify it's correct format
+      // Already a public URL. We need to determine the correct accessible URL.
+      // Sometimes URLs are double encoded (e.g. %2520), sometimes they are not.
+      // We will try two strategies:
+      // 1. Use the URL mostly as-is (just ensuring spaces are encoded).
+      // 2. Aggressively decode and re-encode (fixing double encoding).
 
+      let candidate1 = publicUrl;
+      let candidate2 = publicUrl;
+
+      // Strategy 1: Minimal touch (Candidate 1)
       try {
+        if (candidate1.includes(' ')) {
+          candidate1 = candidate1.replace(/ /g, '%20');
+        }
+      } catch (e) { console.error("Error prep candidate 1", e); }
+
+      // Strategy 2: Aggressive fix (Candidate 2)
+      try {
+        // Decode path to get raw characters
         const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME || "woreda-documents";
-        const urlObj = new URL(publicUrl);
+        const urlObj = new URL(publicUrl.replace(/ /g, '%20')); // ensure parseable
         let path = urlObj.pathname;
-
         if (path.startsWith('/')) path = path.substring(1);
+        if (path.startsWith(bucketName + '/')) path = path.substring(bucketName.length + 1);
 
-        // If the path starts with the bucket name, remove it
-        if (path.startsWith(bucketName + '/')) {
-          console.warn("⚠️  Bucket name found in public URL path, removing it...");
-          path = path.substring(bucketName.length + 1);
+        let rawPath = path;
+        let decodeAttempts = 0;
+        while (decodeAttempts < 3 && (rawPath.includes('%') || rawPath.includes('+'))) {
+          try {
+            const decoded = decodeURIComponent(rawPath);
+            if (decoded === rawPath) break;
+            rawPath = decoded;
+          } catch (e) { break; }
+          decodeAttempts++;
         }
 
-        // Fix double encoding issues (e.g. %2520 -> %20 -> space)
-        // We decode the path to get the raw characters, then encode only the necessary parts if needed
-        // But for R2, we usually want the raw path if we are constructing the URL
-        try {
-          path = decodeURIComponent(path);
-        } catch (e) {
-          console.warn("Failed to decode path:", path);
-        }
-
-        // Re-construct the URL
-        // We need to ensure spaces are encoded as %20, but not double encoded
-        const parts = path.split('/');
-        // encodeURIComponent doesn't encode ( ) ! ' * ~
-        // Microsoft Office Viewer might struggle with ( and ) in the URL
+        // Re-encode properly
+        const parts = rawPath.split('/');
         const encodedPath = parts.map(p =>
           encodeURIComponent(p)
             .replace(/\(/g, '%28')
             .replace(/\)/g, '%29')
         ).join('/');
 
-        const base = urlObj.origin;
-        publicUrl = `${base}/${encodedPath}`;
-
-        // Fix for the specific double-encoded case mentioned
-        // If the original URL had %2520, it means it was double encoded.
-        // We want the final URL to have %20, not %2520
+        candidate2 = `${urlObj.origin}/${encodedPath}`;
       } catch (e) {
-        console.error("Error parsing existing public URL:", e);
+        console.error("Error prep candidate 2", e);
+        candidate2 = candidate1; // Fallback
+      }
+
+      // Check which one works
+      console.log("Checking URLs:", { candidate1, candidate2 });
+
+      // Helper to check accessibility
+      const checkUrl = async (url: string) => {
+        try {
+          const res = await fetch(url, {
+            method: "HEAD",
+            headers: { "User-Agent": "Mozilla/5.0" },
+            signal: AbortSignal.timeout(3000)
+          });
+          return res.ok;
+        } catch (e) { return false; }
+      };
+
+      // If they are the same, just check one
+      if (candidate1 === candidate2) {
+        publicUrl = candidate1;
+      } else {
+        // Check Candidate 1 (As-is/Minimal)
+        const isC1Ok = await checkUrl(candidate1);
+        if (isC1Ok) {
+          console.log("Candidate 1 is valid, using it.");
+          publicUrl = candidate1;
+        } else {
+          // Check Candidate 2 (Fixed)
+          const isC2Ok = await checkUrl(candidate2);
+          if (isC2Ok) {
+            console.log("Candidate 2 is valid, using it.");
+            publicUrl = candidate2;
+          } else {
+            console.warn("Both candidates failed HEAD check. Defaulting to Candidate 2 (standard encoding).");
+            publicUrl = candidate2;
+          }
+        }
       }
     } else {
       console.warn("⚠️  Unknown URL format, using as-is:", publicUrl);
+      if (publicUrl.includes(' ')) {
+        publicUrl = publicUrl.replace(/ /g, '%20');
+      }
     }
 
-    // Verify the public URL is accessible (quick check)
+    // Final accessibility check (to set the flag for the client)
     let isAccessible = false;
     let accessibilityError: string | null = null;
 
@@ -152,8 +197,6 @@ export async function GET(request: Request) {
       });
 
       if (!testResponse.ok) {
-        // Even if the HEAD check fails (e.g. 403 or 404), we should still let the client try.
-        // R2 sometimes returns 404 for HEAD but 200 for GET, or blocks server-side requests.
         console.warn("⚠️ Public URL HEAD check failed, but returning as accessible to let client try.");
         console.warn("   URL:", publicUrl);
         console.warn("   Status:", testResponse.status, testResponse.statusText);
@@ -186,4 +229,3 @@ export async function GET(request: Request) {
     );
   }
 }
-

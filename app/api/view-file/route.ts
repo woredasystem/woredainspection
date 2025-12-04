@@ -37,139 +37,144 @@ export async function GET(request: Request) {
 
     // Fetch the file from R2
     try {
-      // Convert upload URL to public URL if needed
-      let fetchUrl = fileUrl;
-      
-      // If URL is using upload endpoint (.r2.cloudflarestorage.com), convert to public URL
+      // 1. Determine the base URL to use
+      let initialUrl = fileUrl;
+
+      // Handle conversion from upload URL to public URL if needed
       if (fileUrl.includes('.r2.cloudflarestorage.com')) {
         let publicUrlBase = process.env.CLOUDFLARE_R2_PUBLIC_URL;
-        
-        // If public URL is incorrectly set to upload endpoint, try to use known public URL
+
         if (!publicUrlBase || publicUrlBase.includes('.r2.cloudflarestorage.com')) {
-          // Try to use the known public URL format
-          // Extract account ID from upload URL or use known public URL
-          const knownPublicUrl = "https://pub-fcc35482a42b44e989b242c288d0d9e1.r2.dev";
-          publicUrlBase = knownPublicUrl;
-          console.warn("⚠️  Using known public URL format for conversion");
+          publicUrlBase = "https://pub-fcc35482a42b44e989b242c288d0d9e1.r2.dev";
         }
-        
-        // Extract the path from the upload URL
-        const urlObj = new URL(fileUrl);
-        const path = urlObj.pathname; // e.g., /woreda-9/000/000/2017/file.docx
-        const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME || "woreda-documents";
-        
-        // Construct public URL
-        if (publicUrlBase.includes('pub-') && publicUrlBase.includes('.r2.dev')) {
-          // Format: https://pub-ACCOUNT.r2.dev/BUCKET/path
+
+        try {
+          const urlObj = new URL(fileUrl);
+          const path = urlObj.pathname;
+          const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME || "woreda-documents";
+
+          // Simple construction logic
           const base = publicUrlBase.endsWith('/') ? publicUrlBase.slice(0, -1) : publicUrlBase;
-          fetchUrl = `${base}/${bucketName}${path}`;
-        } else if (publicUrlBase.includes('.r2.dev')) {
-          // Format: https://BUCKET.ACCOUNT.r2.dev/path
-          const base = publicUrlBase.endsWith('/') ? publicUrlBase.slice(0, -1) : publicUrlBase;
-          fetchUrl = `${base}${path}`;
-        } else {
-          // Custom domain
-          const base = publicUrlBase.endsWith('/') ? publicUrlBase.slice(0, -1) : publicUrlBase;
-          fetchUrl = `${base}${path}`;
+          // If path includes bucket name and public URL is bucket-specific, we might need to strip it
+          // But for safety, let's assume the path from upload URL is what we want, 
+          // and we rely on the "smart" candidate generation below to fix path issues.
+          initialUrl = `${base}${path}`;
+        } catch (e) {
+          console.error("Error converting upload URL:", e);
         }
-        
-        console.log("URL Conversion:", { 
-          original: fileUrl, 
-          converted: fetchUrl,
-          publicUrlBase: publicUrlBase
-        });
       }
-      
-      console.log("Fetching file from R2:", fetchUrl);
-      
-      // Set a timeout for the fetch request
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-      
+
+      // 2. Generate Candidates (Smart URL Strategy)
+      // We try the URL as-is, and a "fixed" version to handle double-encoding/path issues.
+      const candidates: string[] = [];
+
+      // Candidate A: The URL as-is (with minimal space encoding)
+      let candidateA = initialUrl;
+      if (candidateA.includes(' ')) candidateA = candidateA.replace(/ /g, '%20');
+      candidates.push(candidateA);
+
+      // Candidate B: Aggressively fixed URL
       try {
-        const fileResponse = await fetch(fetchUrl, {
-          method: "GET",
-          headers: {
-            "User-Agent": "Mozilla/5.0",
-            "Accept": "*/*",
-          },
-          signal: controller.signal,
-        });
+        const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME || "woreda-documents";
+        const urlObj = new URL(candidateA);
+        let path = urlObj.pathname;
+        if (path.startsWith('/')) path = path.substring(1);
 
-        clearTimeout(timeoutId);
-
-        console.log("R2 response status:", fileResponse.status);
-        
-        if (!fileResponse.ok) {
-          const errorText = await fileResponse.text().catch(() => "Unknown error");
-          console.error("R2 fetch error:", errorText);
-          console.error("Attempted URL:", fetchUrl);
-          
-          // Return a more user-friendly error
-          return NextResponse.json(
-            { 
-              error: "Failed to fetch file from storage.",
-              details: `Status: ${fileResponse.status}`,
-            },
-            { status: fileResponse.status }
-          );
+        // Remove bucket name if present (common issue with public URLs)
+        if (path.startsWith(bucketName + '/')) {
+          path = path.substring(bucketName.length + 1);
         }
 
-        const fileBuffer = await fileResponse.arrayBuffer();
-        const contentType = fileResponse.headers.get("content-type") || 
-          (() => {
-            // Try to determine content type from file extension
-            const ext = document.file_name.split(".").pop()?.toLowerCase();
-            const mimeTypes: Record<string, string> = {
-              "pdf": "application/pdf",
-              "doc": "application/msword",
-              "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-              "xls": "application/vnd.ms-excel",
-              "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-              "ppt": "application/vnd.ms-powerpoint",
-              "pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-              "jpg": "image/jpeg",
-              "jpeg": "image/jpeg",
-              "png": "image/png",
-              "gif": "image/gif",
-              "webp": "image/webp",
-              "txt": "text/plain",
-              "csv": "text/csv",
-            };
-            return mimeTypes[ext || ""] || "application/octet-stream";
-          })();
-
-        console.log("File fetched successfully, size:", fileBuffer.byteLength, "bytes, type:", contentType);
-
-        // Return the file with proper headers for viewing
-        return new NextResponse(fileBuffer, {
-          headers: {
-            "Content-Type": contentType,
-            "Content-Disposition": `inline; filename="${encodeURIComponent(document.file_name)}"`,
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET",
-            "Cache-Control": "public, max-age=3600",
-            "X-Content-Type-Options": "nosniff",
-          },
-        });
-      } catch (fetchError: any) {
-        clearTimeout(timeoutId);
-        
-        if (fetchError.name === "AbortError") {
-          console.error("R2 fetch timeout:", fetchUrl);
-          return NextResponse.json(
-            { error: "Request timeout. The file may be too large or the server is slow." },
-            { status: 504 }
-          );
+        // Aggressive Decode
+        let rawPath = path;
+        let decodeAttempts = 0;
+        while (decodeAttempts < 3 && (rawPath.includes('%') || rawPath.includes('+'))) {
+          try {
+            const decoded = decodeURIComponent(rawPath);
+            if (decoded === rawPath) break;
+            rawPath = decoded;
+          } catch (e) { break; }
+          decodeAttempts++;
         }
-        
-        console.error("Error fetching file from R2:", fetchError);
+
+        // Clean Re-encode
+        const parts = rawPath.split('/');
+        const encodedPath = parts.map(p => encodeURIComponent(p)).join('/');
+
+        const candidateB = `${urlObj.origin}/${encodedPath}`;
+
+        if (candidateB !== candidateA) {
+          candidates.push(candidateB);
+        }
+      } catch (e) {
+        console.error("Error generating candidate B:", e);
+      }
+
+      console.log("Fetching file candidates:", candidates);
+
+      // 3. Try fetching candidates
+      let fileResponse: Response | null = null;
+      let usedUrl = "";
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
+      try {
+        for (const url of candidates) {
+          try {
+            const res = await fetch(url, {
+              method: "GET",
+              headers: { "User-Agent": "Mozilla/5.0" },
+              signal: controller.signal,
+            });
+
+            if (res.ok) {
+              fileResponse = res;
+              usedUrl = url;
+              break;
+            } else {
+              console.warn(`Failed to fetch candidate: ${url} (${res.status})`);
+            }
+          } catch (err: any) {
+            if (err.name === 'AbortError') throw err;
+            console.warn(`Error fetching candidate: ${url}`, err);
+          }
+        }
+      } finally {
+        clearTimeout(timeoutId);
+      }
+
+      if (!fileResponse || !fileResponse.ok) {
         return NextResponse.json(
-          { error: "Failed to fetch file from storage." },
-          { status: 500 }
+          { error: "Failed to fetch file from storage. The file may not be accessible." },
+          { status: 404 }
         );
       }
-    } catch (fetchError) {
+
+      console.log(`Successfully fetched file using: ${usedUrl}`);
+
+      // 4. Return the file
+      const fileBuffer = await fileResponse.arrayBuffer();
+      const contentType = fileResponse.headers.get("content-type") || "application/octet-stream";
+
+      return new NextResponse(fileBuffer, {
+        headers: {
+          "Content-Type": contentType,
+          "Content-Disposition": `inline; filename="${encodeURIComponent(document.file_name)}"`,
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET",
+          "Cache-Control": "public, max-age=3600",
+          "X-Content-Type-Options": "nosniff",
+        },
+      });
+
+    } catch (fetchError: any) {
+      if (fetchError.name === "AbortError") {
+        return NextResponse.json(
+          { error: "Request timeout." },
+          { status: 504 }
+        );
+      }
       console.error("Error in file fetch process:", fetchError);
       return NextResponse.json(
         { error: "Failed to process file request." },
@@ -184,4 +189,3 @@ export async function GET(request: Request) {
     );
   }
 }
-

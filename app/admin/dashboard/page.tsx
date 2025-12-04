@@ -32,8 +32,8 @@ export default async function AdminDashboardPage() {
         <p className="text-xs font-medium uppercase tracking-wider text-blue-200">
           Administrator
         </p>
-        <h1 className="mt-2 text-2xl font-bold">
-          {publicEnv.NEXT_PUBLIC_WOREDA_NAME}
+        <h1 className="mt-2 text-xl font-bold leading-tight">
+          አቃቂ ቃሊቲ ክ/ከተማ ወረዳ 5 ብልፅግና ኢንስፔክሽን የስነምግባር ኮሚሽን ቅ/ፅ/ቤት
         </h1>
         <p className="mt-1 text-sm text-blue-100 opacity-90">
           Manage access and documents securely.
@@ -94,8 +94,8 @@ export default async function AdminDashboardPage() {
                   </div>
                   <span
                     className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold uppercase tracking-wider ${request.status === "approved"
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-amber-100 text-amber-700"
+                      ? "bg-emerald-100 text-emerald-700"
+                      : "bg-amber-100 text-amber-700"
                       }`}
                   >
                     {request.status}

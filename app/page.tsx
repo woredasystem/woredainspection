@@ -66,13 +66,12 @@ export default function Home() {
                         transition={{ duration: 0.8 }}
                         className="space-y-8"
                     >
-                        <h1 className="text-5xl font-bold leading-tight text-slate-900 lg:text-7xl">
-                            Welcome to <span className="text-[#4169E1]">{publicEnv.NEXT_PUBLIC_WOREDA_NAME}</span>
+                        <h1 className="text-4xl font-bold leading-tight text-slate-900 lg:text-6xl">
+                            <span className="text-[#4169E1]">አቃቂ ቃሊቲ ክ/ከተማ ወረዳ 5 ብልፅግና ኢንስፔክሽን የስነምግባር ኮሚሽን ቅ/ፅ/ቤት</span>
                         </h1>
 
-                        <p className="mx-auto max-w-2xl text-xl leading-relaxed text-slate-600">
-                            A hub of transparent governance, community development, and digital innovation.
-                            We are dedicated to serving our citizens with integrity and efficiency.
+                        <p className="mx-auto max-w-2xl text-xl leading-relaxed text-slate-600 font-bold">
+                            ጠንካራ ኮሚሽን ለጠንካራ ፖርቲ!
                         </p>
 
                         <div className="flex flex-wrap justify-center gap-4 pt-8">
