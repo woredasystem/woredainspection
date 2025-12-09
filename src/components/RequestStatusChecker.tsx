@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { HiQrCode, HiClock, HiCheckCircle, HiXCircle, HiArrowRight } from "react-icons/hi2";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useTranslations } from 'next-intl';
 
 interface RequestStatusCheckerProps {
   code: string;
@@ -19,6 +20,7 @@ export function RequestStatusChecker({
   initialAccessToken,
   clientIp,
 }: RequestStatusCheckerProps) {
+  const t = useTranslations();
   const router = useRouter();
   const [status, setStatus] = useState<"pending" | "approved" | "denied" | null>(initialStatus);
   const [accessToken, setAccessToken] = useState<string | null>(initialAccessToken);
@@ -80,10 +82,10 @@ export function RequestStatusChecker({
           </div>
           <div>
             <p className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-1">
-              Temporary Access Flow
+              {t('access.temporaryAccessFlow')}
             </p>
             <h1 className="text-2xl font-bold text-slate-900">
-              {isApproved ? "Access Approved" : isDenied ? "Access Denied" : "Requesting Access..."}
+              {isApproved ? t('access.accessApproved') : isDenied ? t('access.accessDenied') : t('access.requestingAccess')}
             </h1>
           </div>
         </motion.div>
@@ -106,15 +108,14 @@ export function RequestStatusChecker({
               )}
             </div>
             <h2 className="text-2xl font-bold text-slate-900">
-              {isApproved ? "Access Granted" : isDenied ? "Access Denied" : "Under Review"}
+              {isApproved ? t('access.accessGranted') : isDenied ? t('access.accessDenied') : t('access.underReview')}
             </h2>
           </div>
 
           {isApproved ? (
             <>
               <p className="mb-8 text-lg leading-relaxed text-slate-600">
-                Your request has been approved! You now have temporary access to view documents.
-                This access is valid for up to two hours.
+                {t('access.requestApprovedMessage')}
               </p>
               {accessToken && (
                 <div className="mb-8">
@@ -122,7 +123,7 @@ export function RequestStatusChecker({
                     href={`/documents?token=${accessToken}`}
                     className="inline-flex items-center gap-3 rounded-full bg-emerald-600 px-8 py-4 text-sm font-bold uppercase tracking-widest text-white transition hover:bg-emerald-700 hover:shadow-lg hover:-translate-y-0.5"
                   >
-                    View Documents
+                    {t('access.viewDocuments')}
                     <HiArrowRight className="h-5 w-5" />
                   </Link>
                 </div>
@@ -130,12 +131,20 @@ export function RequestStatusChecker({
             </>
           ) : isDenied ? (
             <p className="mb-8 text-lg leading-relaxed text-slate-600">
-              Your access request has been denied. Please contact an administrator if you believe this is an error.
+              {t('access.requestDenied')}
             </p>
           ) : (
             <p className="mb-8 text-lg leading-relaxed text-slate-600">
-              The QR code was logged with IP <span className="font-bold text-slate-900">{clientIp}</span>. An administrator will
-              review the request shortly.
+              {(() => {
+                const text = t('access.requestPending', { ip: clientIp });
+                const parts = text.split(clientIp);
+                return parts.map((part, i) => (
+                  <span key={i}>
+                    {part}
+                    {i < parts.length - 1 && <span className="font-bold text-slate-900">{clientIp}</span>}
+                  </span>
+                ));
+              })()}
               {isPolling && (
                 <span className="ml-2 inline-block animate-pulse">⏳</span>
               )}
@@ -146,16 +155,16 @@ export function RequestStatusChecker({
             <div>
               <dt className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
                 <HiQrCode className="h-4 w-4" />
-                Request code
+                {t('access.requestCode')}
               </dt>
               <dd className="font-mono text-lg font-bold text-slate-900">
-                {code ?? "Awaiting QR"}
+                {code ?? t('access.awaitingQr')}
               </dd>
             </div>
             <div>
               <dt className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
                 <HiCheckCircle className="h-4 w-4" />
-                Status
+                {t('access.status')}
               </dt>
               <dd>
                 <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-widest ${isApproved

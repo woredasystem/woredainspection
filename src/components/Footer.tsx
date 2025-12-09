@@ -17,18 +17,18 @@ export function Footer({ woredaName }: FooterProps) {
             {woredaName}
           </p>
           <p className="text-xs text-slate-500 mt-1">
-            Official Government Portal
+            {t('officialGovernmentPortal')}
           </p>
         </div>
 
         <div className="flex gap-8 text-sm text-slate-600">
-          <a href="#" className="hover:text-[#4169E1] transition-colors">Privacy</a>
-          <a href="#" className="hover:text-[#4169E1] transition-colors">Terms</a>
-          <a href="#" className="hover:text-[#4169E1] transition-colors">Contact</a>
+          <a href="#" className="hover:text-[#4169E1] transition-colors">{t('privacy')}</a>
+          <a href="#" className="hover:text-[#4169E1] transition-colors">{t('terms')}</a>
+          <a href="#" className="hover:text-[#4169E1] transition-colors">{t('contact')}</a>
         </div>
 
         <div className="text-xs text-slate-400">
-          © {new Date().getFullYear()} All rights reserved.
+          © {new Date().getFullYear()} {t('allRightsReserved')}
         </div>
       </div>
     </footer>

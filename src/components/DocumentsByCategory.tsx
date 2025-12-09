@@ -7,6 +7,7 @@ import type { DocumentUploadRecord } from "@/types";
 import { documentCategories } from "@/data/categories";
 import { FileViewer } from "./FileViewer";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from 'next-intl';
 
 interface DocumentsByCategoryProps {
   documents: DocumentUploadRecord[];
@@ -14,6 +15,7 @@ interface DocumentsByCategoryProps {
 }
 
 export function DocumentsByCategory({ documents, accessToken }: DocumentsByCategoryProps) {
+  const t = useTranslations();
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set()
   );
@@ -80,9 +82,9 @@ export function DocumentsByCategory({ documents, accessToken }: DocumentsByCateg
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
           <HiFolder className="h-8 w-8 text-slate-400" />
         </div>
-        <h3 className="text-lg font-bold text-slate-900">No Documents Found</h3>
+        <h3 className="text-lg font-bold text-slate-900">{t('documents.noDocuments')}</h3>
         <p className="mt-2 text-slate-500">
-          Please check back shortly after the administrator uploads new records.
+          {t('documents.noDocumentsMessage')}
         </p>
       </div>
     );

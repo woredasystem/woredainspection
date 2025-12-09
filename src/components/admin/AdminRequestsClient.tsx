@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { HiQrCode, HiCheckCircle, HiClock, HiTrash } from "react-icons/hi2";
+import { HiQrCode, HiCheckCircle, HiClock, HiTrash, HiXCircle } from "react-icons/hi2";
 import { ApproveRequestButton } from "@/components/admin/ApproveRequestButton";
+import { useTranslations } from 'next-intl';
+import { motion } from "framer-motion";
 import type { QrRequestRecord } from "@/types";
 
 interface AdminRequestsClientProps {
@@ -10,6 +12,7 @@ interface AdminRequestsClientProps {
 }
 
 export function AdminRequestsClient({ requests }: AdminRequestsClientProps) {
+    const t = useTranslations('admin');
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [isDeleting, setIsDeleting] = useState(false);
 
@@ -78,109 +81,128 @@ export function AdminRequestsClient({ requests }: AdminRequestsClientProps) {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <section className="rounded-3xl bg-gradient-to-br from-blue-600 to-purple-700 p-6 text-white shadow-lg">
-                <div className="flex items-center gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20">
-                        <HiQrCode className="h-6 w-6" />
-                    </div>
-                    <div>
-                        <h1 className="text-2xl font-bold">QR Access Requests</h1>
-                        <p className="text-sm text-blue-100 opacity-90">
-                            Review and approve QR code access requests from users
-                        </p>
-                    </div>
-                </div>
-            </section>
-
             {/* Requests List */}
-            <section className="space-y-4 rounded-3xl bg-white p-6 shadow-lg">
+            <motion.section
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-6 rounded-3xl border border-slate-200 bg-white p-8 md:p-12 shadow-xl"
+            >
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h2 className="text-xl font-bold text-slate-900">Recent Requests</h2>
-                        <p className="text-xs font-medium text-slate-500 mt-1">
-                            {requests.length} total • {selectedIds.size} selected
+                        <h2 className="text-2xl font-bold text-slate-900">{t('recentRequests')}</h2>
+                        <p className="text-sm font-medium text-slate-500 mt-1">
+                            {t('totalSelected', { total: requests.length, selected: selectedIds.size })}
                         </p>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-3">
                         {requests.length > 0 && (
                             <>
-                                <button
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
                                     onClick={toggleSelectAll}
-                                    className="inline-flex items-center gap-2 rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-200"
+                                    className="inline-flex items-center gap-2 rounded-xl border-2 border-slate-300 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 transition hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700"
                                 >
-                                    {selectedIds.size === requests.length ? 'Deselect All' : 'Select All'}
-                                </button>
+                                    {selectedIds.size === requests.length ? t('deselectAll') : t('selectAll')}
+                                </motion.button>
 
                                 {selectedIds.size > 0 && (
-                                    <button
+                                    <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
                                         onClick={handleDeleteSelected}
                                         disabled={isDeleting}
-                                        className="inline-flex items-center gap-2 rounded-lg bg-red-50 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100 disabled:opacity-50"
+                                        className="inline-flex items-center gap-2 rounded-xl bg-red-50 border-2 border-red-200 px-5 py-2.5 text-sm font-bold text-red-600 transition hover:bg-red-100 hover:border-red-300 disabled:opacity-50"
                                     >
                                         <HiTrash className="h-4 w-4" />
-                                        Delete Selected ({selectedIds.size})
-                                    </button>
+                                        {t('deleteSelected', { count: selectedIds.size })}
+                                    </motion.button>
                                 )}
 
-                                <button
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
                                     onClick={handleClearAll}
                                     disabled={isDeleting}
-                                    className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-700 disabled:opacity-50"
+                                    className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-red-700 px-5 py-2.5 text-sm font-bold text-white shadow-lg transition hover:from-red-700 hover:to-red-800 hover:shadow-xl disabled:opacity-50"
                                 >
                                     <HiTrash className="h-4 w-4" />
-                                    Clear All
-                                </button>
+                                    {t('clearAll')}
+                                </motion.button>
                             </>
                         )}
                     </div>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-4">
                     {requests.length === 0 ? (
-                        <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
-                            <p className="text-sm text-slate-500">No requests yet.</p>
+                        <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 p-12 text-center">
+                            <HiQrCode className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+                            <p className="text-sm font-medium text-slate-500">{t('noRequestsYet')}</p>
                         </div>
                     ) : (
-                        requests.map((request) => {
+                        requests.map((request, idx) => {
                             const isSelected = selectedIds.has(request.id);
 
                             return (
-                                <article
+                                <motion.article
                                     key={request.id}
-                                    className={`flex flex-col gap-3 rounded-2xl border p-4 transition-all ${isSelected
-                                            ? 'border-blue-300 bg-blue-50/50'
-                                            : 'border-slate-200 bg-white hover:border-slate-300'
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: idx * 0.05 }}
+                                    className={`group flex flex-col gap-4 rounded-2xl border-2 p-6 transition-all ${isSelected
+                                            ? 'border-blue-400 bg-blue-50/50 shadow-md'
+                                            : 'border-slate-200 bg-white hover:border-blue-300 hover:shadow-lg'
                                         }`}
                                 >
-                                    <div className="flex items-start gap-3">
+                                    <div className="flex items-start gap-4">
                                         <input
                                             type="checkbox"
                                             checked={isSelected}
                                             onChange={() => toggleSelection(request.id)}
-                                            className="mt-1 h-5 w-5 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-0"
+                                            className="mt-1 h-5 w-5 rounded border-2 border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-0"
                                         />
 
                                         <div className="flex-1 min-w-0">
-                                            <div className="flex items-start justify-between gap-4">
+                                            <div className="flex items-start justify-between gap-4 mb-3">
                                                 <div className="min-w-0 flex-1">
-                                                    <p className="text-base font-bold text-slate-900 font-mono">
-                                                        {request.code}
-                                                    </p>
-                                                    <p className="text-xs text-slate-500 mt-1">
-                                                        {request.ip_address ?? "IP Unknown"} • {new Date(request.created_at).toLocaleString()}
+                                                    <div className="flex items-center gap-3 mb-2">
+                                                        <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${request.status === "approved"
+                                                                ? "bg-emerald-50 text-emerald-600"
+                                                                : request.status === "denied"
+                                                                    ? "bg-red-50 text-red-600"
+                                                                    : "bg-amber-50 text-amber-600"
+                                                            }`}>
+                                                            {request.status === "approved" ? (
+                                                                <HiCheckCircle className="h-5 w-5" />
+                                                            ) : request.status === "denied" ? (
+                                                                <HiXCircle className="h-5 w-5" />
+                                                            ) : (
+                                                                <HiClock className="h-5 w-5" />
+                                                            )}
+                                                        </div>
+                                                        <p className="text-lg font-bold text-slate-900 font-mono">
+                                                            {request.code}
+                                                        </p>
+                                                    </div>
+                                                    <p className="text-xs text-slate-500 ml-[52px]">
+                                                        {request.ip_address ?? t('ipUnknown')} • {new Date(request.created_at).toLocaleString()}
                                                     </p>
                                                 </div>
 
                                                 <span
-                                                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold uppercase tracking-wider whitespace-nowrap ${request.status === "approved"
-                                                            ? "bg-emerald-100 text-emerald-700"
-                                                            : "bg-amber-100 text-amber-700"
+                                                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-wider whitespace-nowrap ${request.status === "approved"
+                                                            ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                                                            : request.status === "denied"
+                                                                ? "bg-red-100 text-red-700 border border-red-200"
+                                                                : "bg-amber-100 text-amber-700 border border-amber-200"
                                                         }`}
                                                 >
                                                     {request.status === "approved" ? (
                                                         <HiCheckCircle className="h-3.5 w-3.5" />
+                                                    ) : request.status === "denied" ? (
+                                                        <HiXCircle className="h-3.5 w-3.5" />
                                                     ) : (
                                                         <HiClock className="h-3.5 w-3.5" />
                                                     )}
@@ -189,18 +211,18 @@ export function AdminRequestsClient({ requests }: AdminRequestsClientProps) {
                                             </div>
 
                                             {request.status === "pending" && (
-                                                <div className="mt-3">
+                                                <div className="mt-4 pt-4 border-t border-slate-100">
                                                     <ApproveRequestButton requestId={request.id} />
                                                 </div>
                                             )}
                                         </div>
                                     </div>
-                                </article>
+                                </motion.article>
                             );
                         })
                     )}
                 </div>
-            </section>
+            </motion.section>
         </div>
     );
 }

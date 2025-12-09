@@ -3,7 +3,7 @@ import type { StaticImageData } from "next/image";
 export interface LeaderProfile {
   name: string;
   title: string;
-  photo: StaticImageData;
+  photo: string | StaticImageData;
 }
 
 export interface LeaderCategory {

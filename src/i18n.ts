@@ -2,9 +2,9 @@ import { getRequestConfig } from 'next-intl/server';
 import { cookies } from 'next/headers';
 
 export default getRequestConfig(async () => {
-    // Get locale from cookie or default to 'en'
+    // Get locale from cookie or default to 'am' (Amharic)
     const cookieStore = await cookies();
-    const locale = cookieStore.get('NEXT_LOCALE')?.value || 'en';
+    const locale = cookieStore.get('NEXT_LOCALE')?.value || 'am';
 
     return {
         locale,

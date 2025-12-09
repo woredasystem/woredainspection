@@ -3,8 +3,12 @@
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import { HiQrCode, HiArrowDownTray, HiCheckCircle, HiArrowPath } from "react-icons/hi2";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { useTranslations } from 'next-intl';
+import { motion } from "framer-motion";
 
 export default function QrGeneratorPage() {
+  const t = useTranslations('admin');
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [qrCode, setQrCode] = useState<string>("");
   const [requestUrl, setRequestUrl] = useState<string>("");
@@ -53,89 +57,98 @@ export default function QrGeneratorPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-[32px] border border-white/10 bg-slate-900/80 p-6 text-sm text-slate-200 shadow-[0_30px_60px_rgba(15,23,42,0.5)]">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50">
-            <HiQrCode className="h-6 w-6 text-blue-600" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-semibold text-white">
-              QR Code Generator
-            </h1>
-            <p className="mt-2 text-sm leading-relaxed text-slate-300">
-              Generate QR codes for document access requests. Download and print these codes for physical distribution.
-            </p>
-          </div>
-        </div>
-      </section>
+    <div className="space-y-8 pb-20 md:pb-0">
+      <AdminPageHeader
+        icon="qr"
+        titleKey="generateQR"
+        descriptionKey="generateQRDescription"
+        gradient="from-emerald-600 via-teal-600 to-cyan-600"
+      />
 
-      <section className="rounded-[32px] border border-slate-200 bg-white/90 p-8 shadow-[0_30px_90px_rgba(15,23,42,0.08)]">
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50">
-              <HiCheckCircle className="h-6 w-6 text-emerald-600" />
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="rounded-3xl border border-slate-200 bg-white p-8 md:p-12 shadow-xl"
+      >
+        <div className="mb-8 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50">
+              <HiCheckCircle className="h-7 w-7 text-emerald-600" />
             </div>
-            <h2 className="text-2xl font-semibold text-slate-900">
-              Generate New QR Code
-            </h2>
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900">
+                {t('generateNewQR')}
+              </h2>
+              <p className="mt-1 text-sm text-slate-500">
+                {t('generateQRSubtitle')}
+              </p>
+            </div>
           </div>
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={generateQR}
-            className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
+            className="inline-flex items-center gap-2 rounded-xl border-2 border-slate-300 bg-white px-6 py-3 text-sm font-bold text-slate-700 transition hover:border-emerald-500 hover:bg-emerald-50 hover:text-emerald-700"
           >
-            <HiArrowPath className="h-4 w-4" />
-            Generate New
-          </button>
+            <HiArrowPath className="h-5 w-5" />
+            {t('generateNew')}
+          </motion.button>
         </div>
-        
-        <p className="mb-6 text-sm leading-relaxed text-slate-600">
-          This QR code can be printed and distributed. When scanned, it will automatically request document access.
-        </p>
 
         {qrDataUrl ? (
-          <div className="flex flex-col items-center gap-6">
-            <div className="rounded-2xl border-4 border-slate-200 bg-white p-8 shadow-lg">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-col items-center gap-8"
+          >
+            <div className="rounded-3xl border-4 border-slate-200 bg-gradient-to-br from-white to-slate-50 p-8 shadow-2xl">
               <img
                 src={qrDataUrl}
                 alt="QR Code for document access request"
                 className="h-auto w-full max-w-md"
               />
             </div>
-            <div className="flex flex-col items-center gap-2">
-              <p className="text-xs uppercase tracking-[0.4em] text-slate-400">
-                Request Code
+            <div className="flex flex-col items-center gap-3 w-full max-w-md">
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
+                {t('requestCode')}
               </p>
-              <p className="font-mono text-lg font-semibold text-slate-900">
+              <p className="font-mono text-xl font-bold text-slate-900 bg-slate-100 px-4 py-2 rounded-xl">
                 {qrCode}
               </p>
-              <p className="mt-2 max-w-md break-all text-center text-xs text-slate-500">
+              <p className="mt-2 max-w-md break-all text-center text-xs text-slate-500 bg-slate-50 px-4 py-2 rounded-lg">
                 {requestUrl}
               </p>
             </div>
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={handleDownload}
-              className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-slate-900 px-6 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-slate-800"
+              className="inline-flex items-center gap-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-8 py-4 text-sm font-bold text-white shadow-lg transition hover:from-emerald-700 hover:to-teal-700 hover:shadow-xl"
             >
-              <HiArrowDownTray className="h-4 w-4" />
-              Download QR Code
-            </button>
-          </div>
+              <HiArrowDownTray className="h-5 w-5" />
+              {t('downloadQRCode')}
+            </motion.button>
+          </motion.div>
         ) : (
-          <div className="flex items-center justify-center py-12">
+          <div className="flex items-center justify-center py-16">
             <div className="text-center">
-              <div className="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-slate-200 border-t-slate-600"></div>
-              <p className="text-sm text-slate-600">Generating QR code...</p>
+              <div className="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-slate-200 border-t-emerald-600"></div>
+              <p className="text-sm font-medium text-slate-600">{t('generatingQR')}</p>
             </div>
           </div>
         )}
 
-        <div className="mt-8 rounded-xl bg-blue-50 px-4 py-3">
-          <p className="text-xs uppercase tracking-[0.4em] text-blue-700">
-            Print this QR code and distribute it. When scanned, users will automatically request document access.
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="mt-8 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 px-6 py-4"
+        >
+          <p className="text-sm font-medium text-emerald-800">
+            {t('qrCodeInstructions')}
           </p>
-        </div>
-      </section>
+        </motion.div>
+      </motion.section>
     </div>
   );
 }

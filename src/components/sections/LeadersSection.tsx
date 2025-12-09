@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { LeaderCategory, LeaderProfile } from "@/types";
 import { HiUser, HiChevronLeft, HiChevronRight } from "react-icons/hi2";
 import { useState } from "react";
+import { useTranslations } from 'next-intl';
 
 interface LeaderSectionProps {
   principal: LeaderProfile & { speech: string };
@@ -12,6 +13,50 @@ interface LeaderSectionProps {
 }
 
 export function LeadersSection({ principal, categories }: LeaderSectionProps) {
+  const t = useTranslations();
+  
+  // Map category IDs to translation keys
+  const getCategoryTitle = (categoryId: string) => {
+    const titleMap: Record<string, string> = {
+      "commission-committee": t('leaders.commissionCommittee'),
+      "management": t('leaders.managementMembers'),
+      "work-leadership": t('leaders.workLeadership'),
+      "monitoring-committees": t('leaders.monitoringCommittees'),
+    };
+    return titleMap[categoryId] || categories.find(c => c.id === categoryId)?.title || '';
+  };
+  
+  // Map member titles to translation keys
+  const getMemberTitle = (title: string) => {
+    // Map based on key phrases in the title
+    if (title.includes('ኮሚቴ ሰብሳቢ') && !title.includes('ኮሚሽን ኮሚቴ')) {
+      return t('leaders.titleCommissionChair');
+    }
+    if (title.includes('ሰብሳቢ') && title.includes('ፅ/ቤት')) {
+      return t('leaders.titleOfficeChair');
+    }
+    if (title.includes('ፀሀፊና') || title.includes('Secretary')) {
+      return t('leaders.titleSecretary');
+    }
+    if (title.includes('የኢንስፔክሽን ዘርፍ') || title.includes('Inspection Sector')) {
+      return t('leaders.titleInspectionHead');
+    }
+    if (title.includes('ም/ሰብሳቢ') || title.includes('Deputy')) {
+      return t('leaders.titleDeputyChair');
+    }
+    if (title.includes('የተቋም ግንባታ') || title.includes('Institution Building')) {
+      return t('leaders.titleInstitutionChair');
+    }
+    if (title.includes('የአካላትና') || title.includes('Bodies and Members Rights')) {
+      return t('leaders.titleRightsChair');
+    }
+    if (title.includes('ፖርቲ ገንዘብ') || title.includes('Party Finance')) {
+      return t('leaders.titleFinanceChair');
+    }
+    // Fallback to original title if no match
+    return title;
+  };
+  
   const scrollSlider = (id: string, direction: "left" | "right") => {
     const slider = document.getElementById(id);
     if (slider) {
@@ -47,7 +92,7 @@ export function LeadersSection({ principal, categories }: LeaderSectionProps) {
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="flex flex-col items-center gap-6 text-slate-400">
                   <HiUser className="h-40 w-40" />
-                  <span className="text-lg font-medium">Administrator Photo</span>
+                  <span className="text-lg font-medium">{t('leaders.administratorPhoto')}</span>
                 </div>
               </div>
             )}
@@ -57,7 +102,7 @@ export function LeadersSection({ principal, categories }: LeaderSectionProps) {
             {/* Name Overlay */}
             <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
               <h2 className="text-3xl font-bold">{principal.name}</h2>
-              <p className="text-lg font-medium opacity-90">{principal.title}</p>
+              <p className="text-lg font-medium opacity-90">{getMemberTitle(principal.title)}</p>
             </div>
           </div>
 
@@ -69,25 +114,12 @@ export function LeadersSection({ principal, categories }: LeaderSectionProps) {
                 <span className="relative inline-flex h-3 w-3 rounded-full bg-blue-500" />
               </span>
               <span className="text-sm font-bold uppercase tracking-wider">
-                Administrator's Message
+                {t('leaders.administratorMessage')}
               </span>
             </div>
-            <blockquote className="text-2xl font-medium leading-relaxed text-slate-700 lg:text-3xl">
-              "{principal.speech}"
+            <blockquote className="text-xl md:text-2xl font-medium leading-relaxed text-slate-700 lg:text-3xl">
+              "{t('leaders.principalSpeech')}"
             </blockquote>
-            <div className="space-y-4 text-slate-600 leading-relaxed">
-              <p>
-                Our commitment to the people of Woreda 9 is unwavering. We
-                strive to build a community where every voice is heard, every
-                child has access to quality education, and every family feels
-                safe and supported.
-              </p>
-              <p>
-                Through transparent governance and active community participation,
-                we are transforming challenges into opportunities for growth and
-                development.
-              </p>
-            </div>
             <div className="pt-4">
               <div className="h-1 w-24 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mx-auto lg:mx-0" />
             </div>
@@ -96,20 +128,32 @@ export function LeadersSection({ principal, categories }: LeaderSectionProps) {
       </section>
 
       {/* Members Section */}
-      <section id="members" className="space-y-16 scroll-mt-32">
+      <section id="members" className="space-y-20 scroll-mt-32">
         <div className="text-center space-y-4">
-          <h2 className="text-4xl font-bold text-slate-900">Our Team</h2>
-          <p className="text-slate-600 max-w-2xl mx-auto">
-            Dedicated professionals working tirelessly to serve the community across various departments.
+          <h2 className="text-4xl font-bold text-slate-900">{t('leaders.membersStructure')}</h2>
+          <p className="text-slate-600 max-w-2xl mx-auto text-lg">
+            {t('leaders.membersSubtitle')}
           </p>
         </div>
 
-        <div className="space-y-12">
-          {categories.map((category) => (
+        <div className="space-y-16">
+          {categories.map((category, catIdx) => (
             <div key={category.id} className="space-y-6">
               <div className="flex items-center gap-4 px-4">
-                <div className="h-8 w-1 bg-blue-600 rounded-full" />
-                <h3 className="text-2xl font-bold text-slate-900">{category.title}</h3>
+                <div className="h-10 w-1 bg-gradient-to-b from-blue-600 to-purple-600 rounded-full" />
+                <div>
+                  <h3 className="text-2xl md:text-3xl font-bold text-slate-900">{getCategoryTitle(category.id)}</h3>
+                  {category.id === "commission-committee" && (
+                    <p className="text-sm text-slate-500 mt-1">{t('leaders.commissionCommitteeCount')}</p>
+                  )}
+                  {category.id === "monitoring-committees" && (
+                    <div className="text-sm text-slate-500 mt-2 space-y-1">
+                      <p>{t('leaders.monitoringSub1')}</p>
+                      <p>{t('leaders.monitoringSub2')}</p>
+                      <p>{t('leaders.monitoringSub3')}</p>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Slider Container */}
@@ -133,7 +177,7 @@ export function LeadersSection({ principal, categories }: LeaderSectionProps) {
                 {/* Scrollable Area */}
                 <div
                   id={`slider-${category.id}`}
-                  className="flex overflow-x-auto pb-8 pt-4 gap-6 px-4 snap-x snap-mandatory scrollbar-hide scroll-smooth"
+                  className="flex overflow-x-auto pb-8 pt-4 gap-6 px-4 snap-x snap-mandatory no-scrollbar scroll-smooth"
                 >
                   {category.leaders.map((leader, idx) => (
                     <motion.div
@@ -166,7 +210,7 @@ export function LeadersSection({ principal, categories }: LeaderSectionProps) {
                             {leader.name}
                           </h4>
                           <p className="text-sm font-medium text-slate-500">
-                            {leader.title}
+                            {getMemberTitle(leader.title)}
                           </p>
                         </div>
                       </div>

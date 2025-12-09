@@ -3,8 +3,11 @@
 import { FormEvent, useState, useMemo, useRef } from "react";
 import { HiDocumentArrowUp, HiCheckCircle, HiXCircle } from "react-icons/hi2";
 import { documentCategories } from "@/data/categories";
+import { useTranslations } from 'next-intl';
+import { motion } from "framer-motion";
 
 export function UploadForm() {
+  const t = useTranslations('admin');
   const [status, setStatus] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [isUploading, setIsUploading] = useState(false);
@@ -25,7 +28,7 @@ export function UploadForm() {
     const files = formData.getAll("files") as File[];
 
     if (files.length === 0) {
-      setStatus("Please select at least one file.");
+      setStatus(t('selectAtLeastOneFile'));
       setIsUploading(false);
       return;
     }
@@ -55,138 +58,156 @@ export function UploadForm() {
             errorCount++;
             try {
               const errorData = await response.json();
-              errors.push(errorData.message || `Failed to upload ${file.name}`);
+              errors.push(errorData.message || t('failedToUpload', { fileName: file.name }));
             } catch {
-              errors.push(`Failed to upload ${file.name} (${response.status})`);
+              errors.push(t('failedToUpload', { fileName: file.name }));
             }
           }
         } catch (fileError) {
           errorCount++;
-          errors.push(`Error uploading ${file.name}: ${fileError instanceof Error ? fileError.message : "Unknown error"}`);
+          errors.push(t('errorUploading', { fileName: file.name }));
         }
       }
 
       if (errorCount === 0) {
-        setStatus(`${successCount} file(s) uploaded successfully.`);
+        setStatus(t('uploadSuccess', { count: successCount }));
         if (formRef.current) {
           formRef.current.reset();
         }
         setSelectedCategory("");
       } else if (successCount > 0) {
-        setStatus(`${successCount} uploaded, ${errorCount} failed. ${errors[0]}`);
+        setStatus(t('uploadPartial', { success: successCount, failed: errorCount }));
       } else {
-        setStatus(`Upload failed: ${errors[0] || "Unknown error"}`);
+        setStatus(t('uploadFailed', { error: errors[0] || t('unknownError') }));
       }
     } catch (error) {
-      setStatus(`An error occurred: ${error instanceof Error ? error.message : "Unknown error"}`);
+      setStatus(t('uploadError', { error: error instanceof Error ? error.message : t('unknownError') }));
     } finally {
       setIsUploading(false);
     }
   };
 
   return (
-    <form
+    <motion.form
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
       ref={formRef}
       onSubmit={handleSubmit}
-      className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-100 p-6 shadow-sm"
+      className="flex flex-col gap-6"
     >
-      <fieldset className="space-y-1">
-        <legend className="mb-1 text-sm font-bold text-slate-900 bg-slate-200/50 px-2 py-1 rounded-md inline-block">
-          ዋና ኮድ ቁጥር
-        </legend>
-        <select
-          name="category"
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          required
-          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-        >
-          <option value="">Select Category</option>
-          {documentCategories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.id} - {category.label}
-            </option>
-          ))}
-        </select>
-      </fieldset>
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Category Selection */}
+        <div className="space-y-2">
+          <label className="block text-sm font-bold text-slate-900 uppercase tracking-wider">
+            {t('mainCode')}
+          </label>
+          <select
+            name="category"
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            required
+            className="w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3.5 text-sm font-medium text-slate-900 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 hover:border-slate-300"
+          >
+            <option value="">{t('selectCategory')}</option>
+            {documentCategories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.id} - {category.label}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      <fieldset className="space-y-1">
-        <legend className="mb-1 text-sm font-bold text-slate-900 bg-slate-200/50 px-2 py-1 rounded-md inline-block">
-          ንኡስ ኮድ
-        </legend>
-        <select
-          name="subcategory"
-          required
-          disabled={!selectedCategory || availableSubcategories.length === 0}
-          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-slate-100 disabled:cursor-not-allowed"
-        >
-          <option value="">Select Subcategory</option>
-          {availableSubcategories.map((subcategory) => (
-            <option key={subcategory.code} value={subcategory.code}>
-              {subcategory.code} - {subcategory.label}
-            </option>
-          ))}
-        </select>
-      </fieldset>
+        {/* Subcategory Selection */}
+        <div className="space-y-2">
+          <label className="block text-sm font-bold text-slate-900 uppercase tracking-wider">
+            {t('subCode')}
+          </label>
+          <select
+            name="subcategory"
+            required
+            disabled={!selectedCategory || availableSubcategories.length === 0}
+            className="w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3.5 text-sm font-medium text-slate-900 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 hover:border-slate-300 disabled:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <option value="">{t('selectSubcategory')}</option>
+            {availableSubcategories.map((subcategory) => (
+              <option key={subcategory.code} value={subcategory.code}>
+                {subcategory.code} - {subcategory.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
 
-      <label className="block space-y-1">
-        <span className="mb-1 text-sm font-bold text-slate-900 bg-slate-200/50 px-2 py-1 rounded-md inline-block">
-          Year
-        </span>
+      {/* Year Input */}
+      <div className="space-y-2">
+        <label className="block text-sm font-bold text-slate-900 uppercase tracking-wider">
+          {t('year')}
+        </label>
         <input
           type="text"
           name="year"
           placeholder="2017"
           required
-          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+          className="w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3.5 text-sm font-medium text-slate-900 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 hover:border-slate-300"
         />
-      </label>
+      </div>
 
-      <label className="block space-y-1">
-        <span className="mb-1 text-sm font-bold text-slate-900 bg-slate-200/50 px-2 py-1 rounded-md inline-block">
-          Documents (Multiple files allowed)
-        </span>
-        <div className="relative">
+      {/* File Upload */}
+      <div className="space-y-2">
+        <label className="block text-sm font-bold text-slate-900 uppercase tracking-wider">
+          {t('documents')}
+        </label>
+        <div className="relative group">
           <input
             type="file"
             name="files"
             accept=".pdf,.doc,.docx,.xlsx,.xls,.odt"
             multiple
             required
-            className="w-full rounded-xl border-2 border-dashed border-slate-300 bg-white px-4 py-8 text-sm text-slate-700 outline-none transition hover:border-blue-400 focus:border-blue-500 text-center cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            className="w-full rounded-xl border-2 border-dashed border-slate-300 bg-gradient-to-br from-slate-50 to-white px-4 py-12 text-sm text-slate-700 outline-none transition-all hover:border-indigo-400 hover:bg-indigo-50/50 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 text-center cursor-pointer file:mr-4 file:py-2 file:px-6 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 file:transition-all"
           />
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-slate-400 opacity-50">
-            <HiDocumentArrowUp className="h-8 w-8" />
+          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-3 text-slate-400">
+            <HiDocumentArrowUp className="h-12 w-12 group-hover:text-indigo-600 transition-colors" />
+            <p className="text-sm font-medium">{t('dragAndDrop')}</p>
+            <p className="text-xs">{t('multipleFilesAllowed')}</p>
           </div>
         </div>
-        <p className="mt-1 text-xs text-slate-500 font-medium">
-          You can select multiple files at once
-        </p>
-      </label>
+      </div>
 
-      <button
+      {/* Submit Button */}
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
         type="submit"
         disabled={isUploading}
-        className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-4 text-sm font-bold uppercase tracking-wide text-white shadow-lg transition hover:bg-blue-700 hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed"
+        className="group relative overflow-hidden inline-flex w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-4 text-base font-bold text-white shadow-lg transition-all hover:from-indigo-700 hover:to-purple-700 hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed"
       >
-        <HiDocumentArrowUp className="h-5 w-5" />
-        {isUploading ? "Uploading..." : "upload"}
-      </button>
+        <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+        <HiDocumentArrowUp className="h-5 w-5 relative z-10" />
+        <span className="relative z-10">
+          {isUploading ? t('uploading') : t('upload')}
+        </span>
+      </motion.button>
+
+      {/* Status Message */}
       {status && (
-        <div className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.3em] ${status.includes("successfully")
-          ? "bg-emerald-50 text-emerald-700"
-          : "bg-red-50 text-red-700"
-          }`}>
-          {status.includes("successfully") ? (
-            <HiCheckCircle className="h-4 w-4" />
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`inline-flex items-center gap-3 rounded-xl px-5 py-3.5 text-sm font-semibold ${
+            status.includes(t('successfully')) || status.includes("success")
+              ? "bg-emerald-50 text-emerald-700 border-2 border-emerald-200"
+              : "bg-red-50 text-red-700 border-2 border-red-200"
+          }`}
+        >
+          {status.includes(t('successfully')) || status.includes("success") ? (
+            <HiCheckCircle className="h-5 w-5" />
           ) : (
-            <HiXCircle className="h-4 w-4" />
+            <HiXCircle className="h-5 w-5" />
           )}
           {status}
-        </div>
+        </motion.div>
       )}
-    </form>
+    </motion.form>
   );
 }
-
-

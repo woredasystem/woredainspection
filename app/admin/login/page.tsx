@@ -6,8 +6,10 @@ import { HiLockClosed, HiEnvelope, HiArrowRight } from "react-icons/hi2";
 import { supabaseBrowser } from "@/lib/supabaseBrowser";
 import Image from "next/image";
 import { publicEnv } from "@/lib/env";
+import { useTranslations } from 'next-intl';
 
 export default function AdminLoginPage() {
+  const t = useTranslations('admin');
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -46,10 +48,10 @@ export default function AdminLoginPage() {
             <HiLockClosed className="h-10 w-10 text-white" />
           </div>
           <h1 className="text-5xl font-bold mb-6 leading-tight">
-            Secure Admin Portal
+            {t('secureAdminPortal')}
           </h1>
           <p className="text-lg text-blue-100 leading-relaxed">
-            Manage documents, approve access requests, and oversee Woreda operations from a centralized, secure dashboard.
+            {t('adminDescription')}
           </p>
 
           <div className="mt-12 flex gap-4">
@@ -61,8 +63,8 @@ export default function AdminLoginPage() {
               ))}
             </div>
             <div className="flex flex-col justify-center">
-              <span className="text-sm font-bold">Secure Access</span>
-              <span className="text-xs text-blue-200">Authorized Personnel Only</span>
+              <span className="text-sm font-bold">{t('secureAccess')}</span>
+              <span className="text-xs text-blue-200">{t('authorizedOnly')}</span>
             </div>
           </div>
         </div>
@@ -84,14 +86,14 @@ export default function AdminLoginPage() {
                 className="object-cover"
               />
             </div>
-            <h2 className="text-3xl font-bold text-slate-900">Welcome Back</h2>
-            <p className="mt-2 text-slate-600">Please sign in to your account</p>
+            <h2 className="text-3xl font-bold text-slate-900">{t('welcomeBack')}</h2>
+            <p className="mt-2 text-slate-600">{t('signInPrompt')}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Email Address</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">{t('emailAddress')}</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <HiEnvelope className="h-5 w-5 text-slate-400" />
@@ -108,7 +110,7 @@ export default function AdminLoginPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">{t('password')}</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <HiLockClosed className="h-5 w-5 text-slate-400" />
@@ -143,11 +145,11 @@ export default function AdminLoginPage() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Verifying...
+                  {t('verifying')}
                 </span>
               ) : (
                 <span className="flex items-center gap-2">
-                  Sign In
+                  {t('signIn')}
                   <HiArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </span>
               )}
@@ -156,7 +158,7 @@ export default function AdminLoginPage() {
 
           <div className="pt-6 text-center">
             <p className="text-xs text-slate-400">
-              Protected by secure encryption. Unauthorized access is prohibited.
+              {t('protectedMessage')}
             </p>
           </div>
         </div>

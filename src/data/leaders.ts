@@ -1,97 +1,105 @@
-import portrait from "@/assets/leaders/leader-portrait.svg";
-import educationLead from "@/assets/leaders/leader-education.svg";
-import healthLead from "@/assets/leaders/leader-health.svg";
 import { LeaderCategory, LeaderProfile } from "@/types";
 
 const principal: LeaderProfile & { speech: string } = {
-  name: "Alemu Tesfaye",
-  title: "Woreda 9 Administrator",
-  photo: portrait,
+  name: "ሀፍታይ ገ/ እግዚአብሄር",
+  title: "የአዲስ አበባ ብልፅግና የኢንስፔክሽን የስነ ምግባር ኮሚሽን ፅ/ቤት ሰብሳቢ",
+  photo: "/assets/leaders/ሀፍታይ ገ እግዚአብሄር.jpg",
   speech:
-    "We advance every citizen’s wellbeing through measured plans, diligent service, and transparent communication.",
+    "እኛ ለአዲስ አበባ ህዝቦች ያለእኛ ቁርጠኝነት እንሰራለን። ሁሉም ድምፅ የሚሰማ፣ ሁሉም ልጅ የጥራት ትምህርት የሚያገኝ፣ ሁሉም ቤተሰብ ደህንነት የሚሰማ እና የሚደገፍ ማህበረሰብ ለመገንባት እንጥራለን።",
 };
 
 const categories: LeaderCategory[] = [
   {
-    id: "education",
-    title: "Education & Youth",
+    id: "commission-committee",
+    title: "የኮሚሽን ኮሚቴ አባላት",
     leaders: [
       {
-        name: "Selamawit Teklu",
-        title: "Education Chief",
-        photo: educationLead,
-      },
-      {
-        name: "Mulat Yirga",
-        title: "Youth Programs Director",
-        photo: educationLead,
-      },
-      {
-        name: "Tigist Bekele",
-        title: "School Supervisor",
-        photo: educationLead,
-      },
-      {
-        name: "Dawit Kebede",
-        title: "Curriculum Specialist",
-        photo: educationLead,
-      },
-      {
-        name: "Hana Mekonnen",
-        title: "Youth Coordinator",
-        photo: educationLead,
+        name: "ሀፍታይ ገ/ እግዚአብሄር",
+        title: "የኮሚሽን ኮሚቴ ሰብሳቢ",
+        photo: "/assets/leaders/ሀፍታይ ገ እግዚአብሄር.jpg",
       },
     ],
   },
   {
-    id: "health",
-    title: "Health & Community Services",
+    id: "management",
+    title: "የኮሚሽን ማኔጅመንት አባላት",
     leaders: [
       {
-        name: "Teshome Alemu",
-        title: "Health Director",
-        photo: healthLead,
+        name: "ሀፍታይ ገ/ እግዚአብሄር",
+        title: "የአዲስ አበባ ብልፅግና የኢንስፔክሽን የስነ ምግባር ኮሚሽን ፅ/ቤት ሰብሳቢ",
+        photo: "/assets/leaders/ሀፍታይ ገ እግዚአብሄር.jpg",
       },
       {
-        name: "Eden Gebremedhin",
-        title: "Social Services Coordinator",
-        photo: healthLead,
+        name: "መሪማ ደሊል",
+        title: "የአዲስ አበባ ብልፅግና የኢንስፔክሽን የስነ ምግባር ኮሚሽን ፅ/ቤት ፀሀፊና የፅ/ቤት ሀላፊ",
+        photo: "/assets/leaders/መሪማ ደሊል.jpg",
       },
       {
-        name: "Dr. Abebe Tadesse",
-        title: "Medical Officer",
-        photo: healthLead,
+        name: "አታላይ ምህረት",
+        title: "የአዲስ አበባ ብልፅግና የኢንስፔክሽን የስነ ምግባር ኮሚሽን ፅ/ቤት የኢንስፔክሽን ዘርፍ ሀላፊ",
+        photo: "/assets/leaders/አታላይ ምህረት.jpg",
       },
       {
-        name: "Sara Yohannes",
-        title: "Public Health Nurse",
-        photo: healthLead,
+        name: "Unknown",
+        title: "የአዲስ አበባ ብልፅግና የኢንስፔክሽን የስነ ምግባር ኮሚሽን ቅ/ፅ/ቤት ም/ሰብሳቢ",
+        photo: "/assets/leaders/unk.jpg",
+      },
+      {
+        name: "Unknown 1",
+        title: "የአዲስ አበባ ብልፅግና የኢንስፔክሽን የስነ ምግባር ኮሚሽን ቅ/ፅ/ቤት ም/ሰብሳቢ",
+        photo: "/assets/leaders/unk1.jpg",
       },
     ],
   },
   {
-    id: "planning",
-    title: "Planning & Infrastructure",
+    id: "work-leadership",
+    title: "ስራ አመራር አባላት",
     leaders: [
       {
-        name: "Mihret Hailemariam",
-        title: "Planning Officer",
-        photo: portrait,
+        name: "ሀፍታይ ገ/ እግዚአብሄር",
+        title: "የአዲስ አበባ ብልፅግና የኢንስፔክሽን የስነ ምግባር ኮሚሽን ፅ/ቤት ሰብሳቢ",
+        photo: "/assets/leaders/ሀፍታይ ገ እግዚአብሄር.jpg",
       },
       {
-        name: "Dereje Solomon",
-        title: "Infrastructure Liaison",
-        photo: portrait,
+        name: "መሪማ ደሊል",
+        title: "የአዲስ አበባ ብልፅግና የኢንስፔክሽን የስነ ምግባር ኮሚሽን ፅ/ቤት ፀሀፊና የፅ/ቤት ሀላፊ",
+        photo: "/assets/leaders/መሪማ ደሊል.jpg",
       },
       {
-        name: "Kassahun Tsegaye",
-        title: "Urban Planner",
-        photo: portrait,
+        name: "አታላይ ምህረት",
+        title: "የአዲስ አበባ ብልፅግና የኢንስፔክሽን የስነ ምግባር ኮሚሽን ፅ/ቤት የኢንስፔክሽን ዘርፍ ሀላፊ",
+        photo: "/assets/leaders/አታላይ ምህረት.jpg",
       },
       {
-        name: "Bethlehem Assefa",
-        title: "Project Manager",
-        photo: portrait,
+        name: "Unknown",
+        title: "የአዲስ አበባ ብልፅግና የኢንስፔክሽን የስነ ምግባር ኮሚሽን ቅ/ፅ/ቤት ም/ሰብሳቢ",
+        photo: "/assets/leaders/unk.jpg",
+      },
+      {
+        name: "Unknown 1",
+        title: "የአዲስ አበባ ብልፅግና የኢንስፔክሽን የስነ ምግባር ኮሚሽን ቅ/ፅ/ቤት ም/ሰብሳቢ",
+        photo: "/assets/leaders/unk1.jpg",
+      },
+    ],
+  },
+  {
+    id: "monitoring-committees",
+    title: "የክትትልና ድጋፍ ንዑሳን ኮሚቴ አባላት",
+    leaders: [
+      {
+        name: "ሀፍታይ ገ/ እግዚአብሄር",
+        title: "የተቋም ግንባታ ክትትልና ድጋፍ ንዑስ ኮሚቴ ሰብሳቢ",
+        photo: "/assets/leaders/ሀፍታይ ገ እግዚአብሄር.jpg",
+      },
+      {
+        name: "Unknown",
+        title: "የአካላትና የአባላት መብት ክትትልና ድጋፍ ንዑስ ኮሚቴ ሰብሳቢ",
+        photo: "/assets/leaders/unk.jpg",
+      },
+      {
+        name: "መሪማ ደሊል",
+        title: "የፖርቲ ገንዘብ ንብረት ሰነድ ክትትል ድጋፍ ንዑስ ኮሚቴ ሰብሳቢ",
+        photo: "/assets/leaders/መሪማ ደሊል.jpg",
       },
     ],
   },
@@ -101,5 +109,3 @@ export const woredaLeadership = {
   principal,
   categories,
 };
-
-

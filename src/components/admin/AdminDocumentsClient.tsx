@@ -132,64 +132,40 @@ export function AdminDocumentsClient({ documents }: AdminDocumentsClientProps) {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <section className="rounded-3xl bg-gradient-to-br from-blue-600 to-purple-700 p-6 text-white shadow-lg">
-                <div className="flex flex-col gap-4">
-                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                        <div className="flex items-center gap-4">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20">
-                                <HiDocumentText className="h-6 w-6" />
-                            </div>
-                            <div>
-                                <h1 className="text-2xl font-bold">All Documents</h1>
-                                <p className="text-sm text-blue-100 opacity-90">
-                                    Browse, view, and manage all uploaded documents
-                                </p>
-                            </div>
-                        </div>
-                        <Link
-                            href="/admin/upload"
-                            className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-blue-600 transition hover:bg-blue-50"
+            {/* Bulk Actions Bar */}
+            {documents.length > 0 && (
+                <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg">
+                    <div className="flex flex-wrap items-center gap-3">
+                        <button
+                            onClick={toggleSelectAll}
+                            className="inline-flex items-center gap-2 rounded-xl border-2 border-slate-300 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 transition hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700"
                         >
-                            <HiPlus className="h-5 w-5" />
-                            Upload New
-                        </Link>
-                    </div>
+                            <input
+                                type="checkbox"
+                                checked={selectedDocuments.size === documents.length && documents.length > 0}
+                                onChange={() => { }}
+                                className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                            />
+                            {selectedDocuments.size === documents.length ? "Deselect All" : "Select All"}
+                        </button>
 
-                    {/* Bulk Actions */}
-                    {documents.length > 0 && (
-                        <div className="flex flex-wrap items-center gap-3 border-t border-white/20 pt-4">
+                        {selectedDocuments.size > 0 && (
                             <button
-                                onClick={toggleSelectAll}
-                                className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/20"
+                                onClick={handleBulkDelete}
+                                disabled={isDeleting}
+                                className="inline-flex items-center gap-2 rounded-xl bg-red-50 border-2 border-red-200 px-5 py-2.5 text-sm font-bold text-red-600 transition hover:bg-red-100 hover:border-red-300 disabled:opacity-50"
                             >
-                                <input
-                                    type="checkbox"
-                                    checked={selectedDocuments.size === documents.length && documents.length > 0}
-                                    onChange={() => { }}
-                                    className="h-4 w-4 rounded border-white/30 bg-white/10 text-blue-600 focus:ring-2 focus:ring-white/50"
-                                />
-                                {selectedDocuments.size === documents.length ? "Deselect All" : "Select All"}
+                                <HiTrash className="h-4 w-4" />
+                                Delete Selected ({selectedDocuments.size})
                             </button>
+                        )}
 
-                            {selectedDocuments.size > 0 && (
-                                <button
-                                    onClick={handleBulkDelete}
-                                    disabled={isDeleting}
-                                    className="inline-flex items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-600 disabled:opacity-50"
-                                >
-                                    <HiTrash className="h-4 w-4" />
-                                    Delete Selected ({selectedDocuments.size})
-                                </button>
-                            )}
-
-                            <span className="text-sm text-blue-100">
-                                {documents.length} total document{documents.length !== 1 ? "s" : ""}
-                            </span>
-                        </div>
-                    )}
-                </div>
-            </section>
+                        <span className="text-sm font-medium text-slate-500 ml-auto">
+                            {documents.length} total document{documents.length !== 1 ? "s" : ""}
+                        </span>
+                    </div>
+                </section>
+            )}
 
             {/* Categories */}
             <div className="space-y-6">
