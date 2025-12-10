@@ -30,6 +30,11 @@ const categories: LeaderCategory[] = [
         photo: "/assets/leaders/ሀፍታይ ገ እግዚአብሄር.jpg",
       },
       {
+        name: "ጥላሁን ሮባ",
+        title: "የአዲስ አበባ ብልፅግና የኢንስፔክሽን የስነ ምግባር ኮሚሽን ቅ/ፅ/ቤት ም/ሰብሳቢ",
+        photo: "/assets/leaders/unk.jpg",
+      },
+      {
         name: "መሪማ ደሊል",
         title: "የአዲስ አበባ ብልፅግና የኢንስፔክሽን የስነ ምግባር ኮሚሽን ፅ/ቤት ፀሀፊና የፅ/ቤት ሀላፊ",
         photo: "/assets/leaders/መሪማ ደሊል.jpg",
@@ -40,11 +45,6 @@ const categories: LeaderCategory[] = [
         photo: "/assets/leaders/አታላይ ምህረት.jpg",
       },
       {
-        name: "Unknown",
-        title: "የአዲስ አበባ ብልፅግና የኢንስፔክሽን የስነ ምግባር ኮሚሽን ቅ/ፅ/ቤት ም/ሰብሳቢ",
-        photo: "/assets/leaders/unk.jpg",
-      },
-      {
         name: "Unknown 1",
         title: "የአዲስ አበባ ብልፅግና የኢንስፔክሽን የስነ ምግባር ኮሚሽን ቅ/ፅ/ቤት ም/ሰብሳቢ",
         photo: "/assets/leaders/unk1.jpg",
@@ -53,7 +53,7 @@ const categories: LeaderCategory[] = [
   },
   {
     id: "work-leadership",
-    title: "ስራ አመራር አባላት",
+    title: "ስራ አባላት",
     leaders: [
       {
         name: "ሀፍታይ ገ/ እግዚአብሄር",
@@ -74,11 +74,6 @@ const categories: LeaderCategory[] = [
         name: "Unknown",
         title: "የአዲስ አበባ ብልፅግና የኢንስፔክሽን የስነ ምግባር ኮሚሽን ቅ/ፅ/ቤት ም/ሰብሳቢ",
         photo: "/assets/leaders/unk.jpg",
-      },
-      {
-        name: "Unknown 1",
-        title: "የአዲስ አበባ ብልፅግና የኢንስፔክሽን የስነ ምግባር ኮሚሽን ቅ/ፅ/ቤት ም/ሰብሳቢ",
-        photo: "/assets/leaders/unk1.jpg",
       },
     ],
   },

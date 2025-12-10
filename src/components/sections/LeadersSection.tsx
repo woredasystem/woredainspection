@@ -145,13 +145,6 @@ export function LeadersSection({ principal, categories }: LeaderSectionProps) {
                   {category.id === "commission-committee" && (
                     <p className="text-sm text-slate-500 mt-1">{t('leaders.commissionCommitteeCount')}</p>
                   )}
-                  {category.id === "monitoring-committees" && (
-                    <div className="text-sm text-slate-500 mt-2 space-y-1">
-                      <p>{t('leaders.monitoringSub1')}</p>
-                      <p>{t('leaders.monitoringSub2')}</p>
-                      <p>{t('leaders.monitoringSub3')}</p>
-                    </div>
-                  )}
                 </div>
               </div>
 
