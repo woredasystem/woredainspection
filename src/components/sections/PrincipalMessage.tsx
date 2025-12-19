@@ -34,8 +34,18 @@ export function PrincipalMessage({ principal }: PrincipalMessageProps) {
     };
 
     return (
-        <section id="message" className="py-12 md:py-24 scroll-mt-32">
-            <div className="mx-auto max-w-7xl px-6">
+        <section id="message" className="relative py-12 md:py-24 scroll-mt-32 overflow-hidden">
+            {/* Soft background reusing hero image */}
+            <div className="absolute inset-0 -z-10">
+                <Image
+                    src="/herobg.png"
+                    alt="Background"
+                    fill
+                    className="object-cover opacity-20"
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/80 to-white/90" />
+            </div>
+            <div className="mx-auto max-w-7xl px-6 relative z-10">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}

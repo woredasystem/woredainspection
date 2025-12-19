@@ -10,7 +10,14 @@ export async function createNewsItem(args: {
     title: string;
     content: string;
     summary?: string;
+    title_am?: string;
+    content_am?: string;
+    summary_am?: string;
+    title_or?: string;
+    content_or?: string;
+    summary_or?: string;
     cover_image_url?: string;
+    youtube_url?: string;
     published: boolean;
 }): Promise<NewsRecord | null> {
     const supabase = await getSupabaseServerClient();
@@ -23,7 +30,14 @@ export async function createNewsItem(args: {
             title: args.title,
             content: args.content,
             summary: args.summary,
+            title_am: args.title_am,
+            content_am: args.content_am,
+            summary_am: args.summary_am,
+            title_or: args.title_or,
+            content_or: args.content_or,
+            summary_or: args.summary_or,
             cover_image_url: args.cover_image_url,
+            youtube_url: args.youtube_url,
             published: args.published,
             published_at: args.published ? new Date().toISOString() : null,
         })
@@ -47,7 +61,14 @@ export async function updateNewsItem(
         title: string;
         content: string;
         summary?: string;
+        title_am?: string;
+        content_am?: string;
+        summary_am?: string;
+        title_or?: string;
+        content_or?: string;
+        summary_or?: string;
         cover_image_url?: string;
+        youtube_url?: string;
         published?: boolean;
     }
 ): Promise<NewsRecord | null> {
@@ -57,7 +78,14 @@ export async function updateNewsItem(
         title: args.title,
         content: args.content,
         summary: args.summary,
+        title_am: args.title_am,
+        content_am: args.content_am,
+        summary_am: args.summary_am,
+        title_or: args.title_or,
+        content_or: args.content_or,
+        summary_or: args.summary_or,
         cover_image_url: args.cover_image_url,
+        youtube_url: args.youtube_url,
         updated_at: new Date().toISOString(),
     };
 

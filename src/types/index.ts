@@ -81,7 +81,14 @@ export interface NewsRecord {
   title: string;
   content: string;
   summary?: string;
+  title_am?: string;
+  content_am?: string;
+  summary_am?: string;
+  title_or?: string;
+  content_or?: string;
+  summary_or?: string;
   cover_image_url?: string;
+  youtube_url?: string;
   published: boolean;
   published_at?: string;
   created_at: string;

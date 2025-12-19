@@ -67,8 +67,18 @@ export function CommissionMembers({ categories }: CommissionMembersProps) {
     };
 
     return (
-        <section id="members" className="py-12 md:py-24 space-y-20 scroll-mt-32">
-            <div className="mx-auto max-w-7xl px-6">
+        <section id="members" className="relative py-12 md:py-24 space-y-20 scroll-mt-32 overflow-hidden">
+            {/* Branded background reusing hero image behind members */}
+            <div className="absolute inset-0 -z-10">
+                <Image
+                    src="/herobg.png"
+                    alt="Background"
+                    fill
+                    className="object-cover object-left opacity-25"
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/85 to-white" />
+            </div>
+            <div className="mx-auto max-w-7xl px-6 relative z-10">
                 <div className="text-center space-y-4 mb-16">
                     <h2 className="text-4xl font-bold text-slate-900 leading-tight">
                         {t('leaders.membersSubtitle')}

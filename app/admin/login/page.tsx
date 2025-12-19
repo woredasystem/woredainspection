@@ -37,35 +37,10 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex">
-      {/* Left Side - Visual */}
-      <div className="hidden lg:flex w-1/2 bg-slate-900 relative overflow-hidden items-center justify-center">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#4169E1] to-purple-900 opacity-90" />
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-20" />
-
-        <div className="relative z-10 p-12 text-white max-w-lg text-center">
-          <div className="mb-8 h-48 w-48 mx-auto rounded-3xl bg-white/10 backdrop-blur-xl flex items-center justify-center border border-white/20 overflow-hidden">
-            <Image
-              src="/logo.jpg"
-              alt="Logo"
-              width={192}
-              height={192}
-              className="object-cover"
-            />
-          </div>
-          <h1 className="text-4xl font-bold leading-tight">
-            {t('secureAdminPortal')}
-          </h1>
-        </div>
-
-        {/* Decorative Circles */}
-        <div className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-blue-500 blur-3xl opacity-20" />
-        <div className="absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-purple-500 blur-3xl opacity-20" />
-      </div>
-
-      {/* Right Side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center bg-white p-8">
-        <div className="w-full max-w-md space-y-8">
+    <div className="min-h-screen w-full flex items-center justify-center px-4">
+      {/* Form: on mobile sits directly on background; card style only on large screens */}
+      <div className="w-full max-w-md flex items-center justify-center lg:bg-white/80 lg:backdrop-blur-md lg:p-8 lg:rounded-2xl lg:shadow-2xl lg:border lg:border-white/40">
+        <div className="w-full space-y-8">
           <div className="text-center lg:text-left">
             <div className="mx-auto lg:mx-0 mb-6 h-16 w-16 relative rounded-xl overflow-hidden">
               <Image

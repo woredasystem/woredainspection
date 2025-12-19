@@ -7,13 +7,18 @@ const ensureEnv = (name: string): string => {
 };
 
 export const publicEnv = {
-  NEXT_PUBLIC_WOREDA_ID: process.env.NEXT_PUBLIC_WOREDA_ID ?? "woreda-9",
+  // Default to the woreda ID used in Supabase news records so published news
+  // appears on the public homepage even without explicit env configuration.
+  NEXT_PUBLIC_WOREDA_ID: process.env.NEXT_PUBLIC_WOREDA_ID ?? "prosperity-party-commission",
   NEXT_PUBLIC_WOREDA_NAME: process.env.NEXT_PUBLIC_WOREDA_NAME ?? "የብልጽግና ፓርቲ የኢንስፔክሽንና የሥነምግባር ኮሚሽን",
   NEXT_PUBLIC_WOREDA_LOGO_PATH:
     process.env.NEXT_PUBLIC_WOREDA_LOGO_PATH ?? "/logo.jpg",
   NEXT_PUBLIC_WOREDA_IMAGES_PREFIX:
     process.env.NEXT_PUBLIC_WOREDA_IMAGES_PREFIX ?? "/assets",
-  NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
+  // Default Supabase URL to the known project so SUPABASE_URL is not required
+  // for basic public news fetching. In production, override via env vars.
+  NEXT_PUBLIC_SUPABASE_URL:
+    process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://oblhonzlkflvoxqymmys.supabase.co",
   NEXT_PUBLIC_SUPABASE_ANON_KEY:
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "",
 };

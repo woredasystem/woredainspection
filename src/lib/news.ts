@@ -10,6 +10,22 @@ export async function getNews(limit = 6): Promise<NewsRecord[]> {
     const supabase = await getSupabaseServerClient();
     const woredaId = publicEnv.NEXT_PUBLIC_WOREDA_ID;
 
+    // #region agent log
+    fetch('http://127.0.0.1:7244/ingest/fc0a35e4-d777-4627-b1d5-a657a6abd381', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            sessionId: 'debug-session',
+            runId: 'pre-fix',
+            hypothesisId: 'H1',
+            location: 'src/lib/news.ts:getNews:entry',
+            message: 'getNews called',
+            data: { limit, woredaId },
+            timestamp: Date.now()
+        })
+    }).catch(() => { });
+    // #endregion
+
     const { data, error } = await supabase
         .from("news")
         .select("*")
@@ -18,10 +34,50 @@ export async function getNews(limit = 6): Promise<NewsRecord[]> {
         .order("published_at", { ascending: false })
         .limit(limit);
 
+    // #region agent log
+    fetch('http://127.0.0.1:7244/ingest/fc0a35e4-d777-4627-b1d5-a657a6abd381', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            sessionId: 'debug-session',
+            runId: 'pre-fix',
+            hypothesisId: 'H2',
+            location: 'src/lib/news.ts:getNews:after-query',
+            message: 'getNews query result',
+            data: {
+                woredaId,
+                hasError: !!error,
+                errorMessage: error?.message ?? null,
+                rowCount: Array.isArray(data) ? data.length : null
+            },
+            timestamp: Date.now()
+        })
+    }).catch(() => { });
+    // #endregion
+
     if (error) {
         console.error("Error fetching news:", error);
         return [];
     }
+
+    // #region agent log
+    fetch('http://127.0.0.1:7244/ingest/fc0a35e4-d777-4627-b1d5-a657a6abd381', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            sessionId: 'debug-session',
+            runId: 'pre-fix',
+            hypothesisId: 'H3',
+            location: 'src/lib/news.ts:getNews:exit',
+            message: 'getNews returning data',
+            data: {
+                woredaId,
+                returnedCount: Array.isArray(data) ? data.length : null
+            },
+            timestamp: Date.now()
+        })
+    }).catch(() => { });
+    // #endregion
 
     return (data as NewsRecord[]) || [];
 }

@@ -1,17 +1,21 @@
 "use client";
 
+
 import { useState, FormEvent, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { HiCheckCircle, HiXCircle, HiPhoto, HiPencilSquare, HiCloudArrowUp, HiSparkles } from "react-icons/hi2";
+import { HiCheckCircle, HiXCircle, HiPhoto, HiPencilSquare, HiCloudArrowUp, HiSparkles, HiLanguage } from "react-icons/hi2";
 import { createNewsItem, updateNewsItem, uploadNewsImage } from "@/lib/news-actions";
 import type { NewsRecord } from "@/types";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 interface NewsFormProps {
     initialData?: NewsRecord;
     onSuccess?: () => void;
 }
+
+type Language = 'en' | 'am' | 'or';
 
 export function NewsForm({ initialData, onSuccess }: NewsFormProps) {
     const router = useRouter();
@@ -20,7 +24,16 @@ export function NewsForm({ initialData, onSuccess }: NewsFormProps) {
     const [status, setStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
     const [previewImage, setPreviewImage] = useState<string | null>(initialData?.cover_image_url || null);
     const [isDragging, setIsDragging] = useState(false);
-    const [published, setPublished] = useState(initialData?.published ?? false);
+    // Default new articles to published so they appear on the public homepage
+    const [published, setPublished] = useState(initialData?.published ?? true);
+    const [activeTab, setActiveTab] = useState<Language>('en');
+
+    const t = useTranslations('admin');
+    const languages = [
+        { id: 'en', label: t('english'), flag: '🇬🇧' },
+        { id: 'am', label: t('amharic'), flag: '🇪🇹' },
+        { id: 'or', label: t('oromifa'), flag: '🌳' },
+    ] as const;
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -28,9 +41,24 @@ export function NewsForm({ initialData, onSuccess }: NewsFormProps) {
         setStatus(null);
 
         const formData = new FormData(e.currentTarget);
+
+        // English
         const title = formData.get("title") as string;
         const summary = formData.get("summary") as string;
         const content = formData.get("content") as string;
+
+        // Amharic
+        const title_am = formData.get("title_am") as string;
+        const summary_am = formData.get("summary_am") as string;
+        const content_am = formData.get("content_am") as string;
+
+        // Oromifa
+        const title_or = formData.get("title_or") as string;
+        const summary_or = formData.get("summary_or") as string;
+        const content_or = formData.get("content_or") as string;
+
+        const youtubeUrlRaw = (formData.get("youtube_url") as string | null) ?? "";
+        const youtube_url = youtubeUrlRaw.trim() || undefined;
         const imageFile = formData.get("image") as File;
 
         try {
@@ -40,27 +68,30 @@ export function NewsForm({ initialData, onSuccess }: NewsFormProps) {
                 coverImageUrl = await uploadNewsImage(imageFile);
             }
 
+            const newsData = {
+                title,
+                summary,
+                content,
+                title_am: title_am || undefined,
+                content_am: content_am || undefined,
+                summary_am: summary_am || undefined,
+                title_or: title_or || undefined,
+                content_or: content_or || undefined,
+                summary_or: summary_or || undefined,
+                youtube_url,
+                published,
+                cover_image_url: coverImageUrl,
+            };
+
             if (initialData) {
-                await updateNewsItem(initialData.id, {
-                    title,
-                    summary,
-                    content,
-                    published,
-                    cover_image_url: coverImageUrl,
-                });
-                setStatus({ type: "success", message: "News updated successfully!" });
+                await updateNewsItem(initialData.id, newsData);
+                setStatus({ type: "success", message: t('newsUpdated') });
             } else {
-                await createNewsItem({
-                    title,
-                    summary,
-                    content,
-                    published,
-                    cover_image_url: coverImageUrl,
-                });
-                setStatus({ type: "success", message: "News created successfully!" });
+                await createNewsItem(newsData);
+                setStatus({ type: "success", message: t('newsCreated') });
                 formRef.current?.reset();
                 setPreviewImage(null);
-                setPublished(false);
+                setPublished(true);
             }
 
             router.refresh();
@@ -69,7 +100,7 @@ export function NewsForm({ initialData, onSuccess }: NewsFormProps) {
             console.error(error);
             setStatus({
                 type: "error",
-                message: error instanceof Error ? error.message : "Failed to save news."
+                message: error instanceof Error ? error.message : t('failedToSave')
             });
         } finally {
             setIsSubmitting(false);
@@ -126,11 +157,30 @@ export function NewsForm({ initialData, onSuccess }: NewsFormProps) {
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-100/40 rounded-full blur-3xl -z-10 group-hover:bg-purple-200/40 transition-colors duration-700" />
 
 
+
+            {/* Language Tabs */}
+            <div className="flex bg-slate-100 p-1 rounded-xl mb-6">
+                {languages.map((lang) => (
+                    <button
+                        key={lang.id}
+                        type="button"
+                        onClick={() => setActiveTab(lang.id as Language)}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold transition-all ${activeTab === lang.id
+                            ? 'bg-white text-blue-600 shadow-sm'
+                            : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+                            }`}
+                    >
+                        <span className="text-lg">{lang.flag}</span>
+                        {lang.label}
+                    </button>
+                ))}
+            </div>
+
             <div className="space-y-6">
-                {/* Title Input */}
-                <div className="space-y-2">
+                {/* Title Input - English */}
+                <div className={`space-y-2 ${activeTab === 'en' ? 'block' : 'hidden'}`}>
                     <label className="text-sm font-bold text-slate-700 tracking-wide uppercase flex items-center gap-2">
-                        Post Title <span className="text-red-400">*</span>
+                        {t('postTitle')} <span className="text-red-400">*</span>
                     </label>
                     <input
                         type="text"
@@ -138,26 +188,78 @@ export function NewsForm({ initialData, onSuccess }: NewsFormProps) {
                         defaultValue={initialData?.title}
                         required
                         className="w-full bg-white/50 backdrop-blur-sm rounded-2xl border-2 border-slate-100 px-5 py-4 text-lg font-bold text-slate-900 placeholder:text-slate-400 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-sm focus:shadow-lg"
-                        placeholder="Enter an engaging headline..."
+                        placeholder={t('enterHeadline')}
                     />
                 </div>
 
-                {/* Summary Input */}
-                <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700 tracking-wide uppercase">Summary</label>
+                {/* Title Input - Amharic */}
+                <div className={`space-y-2 ${activeTab === 'am' ? 'block' : 'hidden'}`}>
+                    <label className="text-sm font-bold text-slate-700 tracking-wide uppercase flex items-center gap-2">
+                        {t('postTitleAm')}
+                    </label>
+                    <input
+                        type="text"
+                        name="title_am"
+                        defaultValue={initialData?.title_am}
+                        className="w-full bg-white/50 backdrop-blur-sm rounded-2xl border-2 border-slate-100 px-5 py-4 text-lg font-bold text-slate-900 placeholder:text-slate-400 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-sm focus:shadow-lg"
+                        placeholder={t('enterHeadline')}
+                    />
+                </div>
+
+                {/* Title Input - Oromifa */}
+                <div className={`space-y-2 ${activeTab === 'or' ? 'block' : 'hidden'}`}>
+                    <label className="text-sm font-bold text-slate-700 tracking-wide uppercase flex items-center gap-2">
+                        {t('postTitleOr')}
+                    </label>
+                    <input
+                        type="text"
+                        name="title_or"
+                        defaultValue={initialData?.title_or}
+                        className="w-full bg-white/50 backdrop-blur-sm rounded-2xl border-2 border-slate-100 px-5 py-4 text-lg font-bold text-slate-900 placeholder:text-slate-400 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-sm focus:shadow-lg"
+                        placeholder={t('enterHeadline')}
+                    />
+                </div>
+
+                {/* Summary Input - English */}
+                <div className={`space-y-2 ${activeTab === 'en' ? 'block' : 'hidden'}`}>
+                    <label className="text-sm font-bold text-slate-700 tracking-wide uppercase">{t('summary')}</label>
                     <textarea
                         name="summary"
                         defaultValue={initialData?.summary}
                         rows={2}
                         className="w-full bg-white/50 backdrop-blur-sm rounded-2xl border-2 border-slate-100 px-5 py-4 text-base font-medium text-slate-700 placeholder:text-slate-400 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-sm focus:shadow-lg resize-none"
-                        placeholder="A brief teaser for the news card..."
+                        placeholder={t('enterSummary')}
                     />
                 </div>
 
-                {/* Content Input */}
-                <div className="space-y-2">
+                {/* Summary Input - Amharic */}
+                <div className={`space-y-2 ${activeTab === 'am' ? 'block' : 'hidden'}`}>
+                    <label className="text-sm font-bold text-slate-700 tracking-wide uppercase">{t('summaryAm')}</label>
+                    <textarea
+                        name="summary_am"
+                        defaultValue={initialData?.summary_am}
+                        rows={2}
+                        className="w-full bg-white/50 backdrop-blur-sm rounded-2xl border-2 border-slate-100 px-5 py-4 text-base font-medium text-slate-700 placeholder:text-slate-400 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-sm focus:shadow-lg resize-none"
+                        placeholder={t('enterSummary')}
+                    />
+                </div>
+
+                {/* Summary Input - Oromifa */}
+                <div className={`space-y-2 ${activeTab === 'or' ? 'block' : 'hidden'}`}>
+                    <label className="text-sm font-bold text-slate-700 tracking-wide uppercase">{t('summaryOr')}</label>
+                    <textarea
+                        name="summary_or"
+                        defaultValue={initialData?.summary_or}
+                        rows={2}
+                        className="w-full bg-white/50 backdrop-blur-sm rounded-2xl border-2 border-slate-100 px-5 py-4 text-base font-medium text-slate-700 placeholder:text-slate-400 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-sm focus:shadow-lg resize-none"
+                        placeholder={t('enterSummary')}
+                    />
+                </div>
+
+                {/* Content Input - English */}
+                <div className={`space-y-2 ${activeTab === 'en' ? 'block' : 'hidden'}`}>
                     <label className="text-sm font-bold text-slate-700 tracking-wide uppercase flex items-center gap-2">
-                        Content <span className="text-red-400">*</span>
+                        {t('content')} <span className="text-red-400">*</span>
                     </label>
                     <textarea
                         name="content"
@@ -165,7 +267,49 @@ export function NewsForm({ initialData, onSuccess }: NewsFormProps) {
                         required
                         rows={8}
                         className="w-full bg-white/50 backdrop-blur-sm rounded-2xl border-2 border-slate-100 px-5 py-4 text-base font-medium text-slate-700 placeholder:text-slate-400 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-sm focus:shadow-lg leading-relaxed"
-                        placeholder="Write your article here..."
+                        placeholder={t('writeArticle')}
+                    />
+                </div>
+
+                {/* Content Input - Amharic */}
+                <div className={`space-y-2 ${activeTab === 'am' ? 'block' : 'hidden'}`}>
+                    <label className="text-sm font-bold text-slate-700 tracking-wide uppercase flex items-center gap-2">
+                        {t('contentAm')}
+                    </label>
+                    <textarea
+                        name="content_am"
+                        defaultValue={initialData?.content_am}
+                        rows={8}
+                        className="w-full bg-white/50 backdrop-blur-sm rounded-2xl border-2 border-slate-100 px-5 py-4 text-base font-medium text-slate-700 placeholder:text-slate-400 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-sm focus:shadow-lg leading-relaxed"
+                        placeholder={t('writeArticle')}
+                    />
+                </div>
+
+                {/* Content Input - Oromifa */}
+                <div className={`space-y-2 ${activeTab === 'or' ? 'block' : 'hidden'}`}>
+                    <label className="text-sm font-bold text-slate-700 tracking-wide uppercase flex items-center gap-2">
+                        {t('contentOr')}
+                    </label>
+                    <textarea
+                        name="content_or"
+                        defaultValue={initialData?.content_or}
+                        rows={8}
+                        className="w-full bg-white/50 backdrop-blur-sm rounded-2xl border-2 border-slate-100 px-5 py-4 text-base font-medium text-slate-700 placeholder:text-slate-400 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-sm focus:shadow-lg leading-relaxed"
+                        placeholder={t('writeArticle')}
+                    />
+                </div>
+
+                {/* YouTube Link Input */}
+                <div className="space-y-2">
+                    <label className="text-sm font-bold text-slate-700 tracking-wide uppercase">
+                        {t('youtubeLink')}
+                    </label>
+                    <input
+                        type="url"
+                        name="youtube_url"
+                        defaultValue={initialData?.youtube_url}
+                        className="w-full bg-white/50 backdrop-blur-sm rounded-2xl border-2 border-slate-100 px-5 py-3 text-base font-medium text-slate-700 placeholder:text-slate-400 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all shadow-sm focus:shadow-lg"
+                        placeholder={t('pasteYoutube')}
                     />
                 </div>
             </div>
@@ -173,7 +317,7 @@ export function NewsForm({ initialData, onSuccess }: NewsFormProps) {
             {/* Image Upload Area */}
             <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 tracking-wide uppercase flex items-center gap-2">
-                    Cover Image
+                    {t('coverImage')}
                     <HiSparkles className="w-4 h-4 text-yellow-500" />
                 </label>
 
@@ -203,7 +347,7 @@ export function NewsForm({ initialData, onSuccess }: NewsFormProps) {
                             />
                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
                                 <span className="px-6 py-3 bg-white/20 border border-white/40 rounded-full text-white font-bold backdrop-blur-md shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-all">
-                                    Change Image
+                                    {t('changeImage')}
                                 </span>
                             </div>
                         </>
@@ -213,8 +357,8 @@ export function NewsForm({ initialData, onSuccess }: NewsFormProps) {
                                 <HiPhoto className="w-10 h-10 text-indigo-500" />
                             </div>
                             <div>
-                                <h3 className="text-lg font-bold text-slate-800">Click or Drag Image Here</h3>
-                                <p className="text-slate-500 mt-1 font-medium">16:9 aspect ratio recommended</p>
+                                <h3 className="text-lg font-bold text-slate-800">{t('clickOrDragMap')}</h3>
+                                <p className="text-slate-500 mt-1 font-medium">{t('aspectRatioMap')}</p>
                             </div>
                         </div>
                     )}
@@ -232,10 +376,10 @@ export function NewsForm({ initialData, onSuccess }: NewsFormProps) {
                     </div>
                     <div>
                         <h4 className={`font-bold text-lg ${published ? 'text-green-800' : 'text-slate-700'}`}>
-                            {published ? "Published & Live" : "Draft Mode"}
+                            {published ? t('publishedLive') : t('draftMode')}
                         </h4>
                         <p className="text-sm text-slate-500 font-medium">
-                            {published ? "Visible to everyone on the public site" : "Only visible to admins"}
+                            {published ? t('visiblePublic') : t('visibleAdmin')}
                         </p>
                     </div>
                 </div>
@@ -256,12 +400,12 @@ export function NewsForm({ initialData, onSuccess }: NewsFormProps) {
                     {isSubmitting ? (
                         <>
                             <HiCloudArrowUp className="w-6 h-6 animate-bounce" />
-                            <span>Processing...</span>
+                            <span>{t('processing')}</span>
                         </>
                     ) : (
                         <>
                             <HiPencilSquare className="w-6 h-6" />
-                            <span>{initialData ? "Update Article" : "Publish Article"}</span>
+                            <span>{initialData ? t('updateArticle') : t('publishArticle')}</span>
                         </>
                     )}
                 </button>
