@@ -21,13 +21,9 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  // NOTE: Next.js 15's NextConfig type does not support a top-level `serverActions` option.
+  // NOTE: Next.js 16's NextConfig type does not support a top-level `serverActions` option.
+  // If you need to control body size for server actions or routes, configure it per route
+  // (e.g. via Route Handlers or middleware) instead of here.
 };
 
 export default withNextIntl(nextConfig);

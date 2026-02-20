@@ -44,10 +44,7 @@ export default function QrGeneratorPage() {
   };
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      generateQR();
-    }, 0);
-    return () => clearTimeout(timer);
+    generateQR();
   }, []);
 
   const handleDownload = () => {

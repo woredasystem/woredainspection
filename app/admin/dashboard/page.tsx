@@ -15,8 +15,7 @@ export default async function AdminDashboardPage() {
   const documents = await getDocumentsForCurrentWoreda();
 
   // Filter: Hide approved requests older than 24 hours
-  const now = new Date();
-  const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
   const filteredRequests = recentRequests.filter((req) => {
     if (req.status === "pending") return true;
     return new Date(req.created_at) > oneDayAgo;

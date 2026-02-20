@@ -133,7 +133,7 @@ export function LeaderMessagesCarousel({ leaders }: LeaderMessagesCarouselProps)
                             </span>
                         </div>
                         <blockquote className="text-xl md:text-2xl font-medium leading-relaxed text-slate-700 lg:text-3xl">
-                            &quot;{getSpeech(currentLeader)}&quot;
+                            "{getSpeech(currentLeader)}"
                         </blockquote>
                         <div className="pt-4">
                             <div className="h-1 w-24 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mx-auto lg:mx-0" />
